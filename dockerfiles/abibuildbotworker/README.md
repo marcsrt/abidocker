@@ -23,9 +23,9 @@ An AbiBuildbot worker image includes:
 ### Worker Tools
 - Python 3.x
 - Git
-- Docker (for building nested containers)
-- SSH client/server (for worker communication)
-- Required Python packages for AbiBuildbot
+- Docker CLI (for host Docker socket access when mounted)
+- Buildbot worker protocol runtime
+- Required Python packages for Buildbot worker operation
 
 ## Directory Structure
 
@@ -36,6 +36,7 @@ abibuildbotworker/
 │   └── README.md
 └── ubuntu22.04-gcc-openmpi-openblas/  # MPI worker
     ├── Dockerfile
+    ├── entrypoint.sh
     └── README.md
 ```
 
@@ -50,16 +51,29 @@ docker build \
   dockerfiles/abibuildbotworker/ubuntu22.04-gcc-openmpi-openblas
 ```
 
+## Available Configurations
+
+| OS | Compiler | MPI | Math Lib | Directory | Status |
+|----|----------|-----|----------|-----------|--------|
+| Ubuntu 22.04 | GCC/gfortran | OpenMPI | OpenBLAS + ScaLAPACK | `ubuntu22.04-gcc-openmpi-openblas/` | Available |
+
 ### Run as a Worker
 
 ```bash
 docker run -d \
   --name abibuildbot-worker \
   -e WORKER_NAME=worker-01 \
-  -e MASTER_URL=<abibuildbot-master-url> \
+  -e WORKER_PASSWORD_FILE=/run/secrets/worker-password \
+  -e MASTER_HOST=<abibuildbot-master-host> \
+  -e MASTER_PORT=<worker-port> \
+  -v /path/to/worker-password:/run/secrets/worker-password:ro \
+  -v abibuildbot-worker-state:/buildbot-worker \
+  -v /path/to/workdir:/workdir \
   -v /var/run/docker.sock:/var/run/docker.sock \
   abidocker/abibuildbotworker:ubuntu22.04-gcc-openmpi-openblas
 ```
+
+Mount `/var/run/docker.sock` only for trusted workers that need host Docker access.
 
 ## AbiBuildbot Integration
 
@@ -70,7 +84,7 @@ These images are designed to work with the AbiBuildbot CI system. For more infor
 1. Create a subdirectory for your configuration
 2. Create a Dockerfile that:
    - Extends a build-environment image
-   - Adds worker-specific tools (Python, Git, Docker, SSH)
+   - Adds worker-specific tools (Python, Git, Docker CLI, Buildbot worker)
    - Configures the worker startup
 3. Document the configuration in a README.md
 4. Update this file with the new configuration

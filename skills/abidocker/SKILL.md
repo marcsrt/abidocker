@@ -17,7 +17,7 @@ Generate Dockerfiles for ABINIT Docker images in three categories.
 
 1. **build-environment** — Software environment (OS, compiler, MPI, math libs) for building/running ABINIT. Does NOT include ABINIT source or build process.
 2. **with-abinit** — Same as build-environment PLUS ABINIT cloned, built, tested, and installed from a specific git version/branch.
-3. **abibuildbotworker** — Build-environment PLUS CI worker tools (Python, Git, Docker-in-Docker, SSH, AbiBuildbot worker scripts).
+3. **abibuildbotworker** — Build-environment PLUS CI worker tools (Python, Git, Docker CLI, Buildbot worker runtime).
 
 ## Workflow
 
@@ -135,8 +135,9 @@ ENV OMPI_MCA_btl_vader_single_copy_mechanism=none
 - Include pseudopotentials: copy `tests/Pspdir` to `/opt/abinit/tests/`.
 
 ### abibuildbotworker
-- Extends build-environment with: Python 3, Docker CLI, Docker Compose, SSH client/server, Git, AbiBuildbot worker package.
-- Must support Docker-in-Docker (dind).
+- Extends build-environment with: Python 3, Docker CLI for host socket access, Git, and Buildbot worker runtime.
+- Must support host Docker socket mounting for trusted workers that need Docker access.
+- Should use the Buildbot worker protocol directly, without requiring SSH inside the container.
 - CMD should start the worker process, not ABINIT.
 
 ## References

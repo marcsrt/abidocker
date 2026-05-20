@@ -33,7 +33,8 @@ dockerfiles/
 ├── with-abinit/                        # ABINIT pre-installed images
 │   └── README.md                       # Template and documentation
 └── abibuildbotworker/                  # AbiBuildbot CI worker images
-    └── README.md                       # Template and documentation
+    ├── README.md                       # Template and documentation
+    └── ubuntu22.04-gcc-openmpi-openblas/  # MPI worker with OpenBLAS
 ```
 
 ## The List of Dockerfiles
@@ -83,7 +84,7 @@ Docker images with ABINIT pre-installed. Each configuration specifies the build 
 
 ### AbiBuildbot Workers
 
-Docker images for running AbiBuildbot CI workers. Includes build environment + worker tools (Python, Git, Docker, SSH).
+Docker images for running AbiBuildbot CI workers. Includes build environment + worker tools (Python, Git, Docker CLI, Buildbot worker runtime).
 
 #### What's Included
 
@@ -92,15 +93,15 @@ Docker images for running AbiBuildbot CI workers. Includes build environment + w
 | Build Environment | Based on build-environment configurations |
 | Python | Python 3.x for worker operation |
 | Git | Git client for repository operations |
-| Docker | Docker-in-Docker capability |
-| SSH | Client/server for worker communication |
-| AbiBuildbot | Worker-specific packages and scripts |
+| Docker | Docker CLI for host Docker socket access when mounted |
+| Worker protocol | Direct Buildbot worker protocol runtime |
+| AbiBuildbot | Provided at runtime through mounted checkouts or configuration |
 
 #### Available Configurations
 
 | OS | Compiler | MPI | Math Lib | Directory | Description | Status |
 |----|----------|-----|----------|-----------|-------------|--------|
-| - | - | - | - | `abibuildbotworker/` | (TODO: Add configurations) | - |
+| Ubuntu 22.04 | GCC | OpenMPI 4.x | OpenBLAS + ScaLAPACK | `abibuildbotworker/ubuntu22.04-gcc-openmpi-openblas/` | MPI worker with Buildbot runtime tooling | Available |
 
 ## SKILLS
 
