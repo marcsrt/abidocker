@@ -1,0 +1,128 @@
+# AbiDocker
+
+Docker containers for building and testing [ABINIT](https://www.abinit.org/) — atomic-scale simulation software based on density functional theory (DFT).
+
+
+
+## Available Configurations
+
+| Configuration | Status | Image Size | Use Case |
+|---|---|---|---|
+| **minimal-serial** | ✅ | ~500 MB | Learning, testing, CI/CD |
+| **mpi-openblas** | ✅ | ~1.5 GB | Production parallel calculations |
+| **Intel MKL** | 🚧 | ~2–3 GB | HPC with Intel compilers |
+| **GPU (CUDA/ROCm)** | 🚧 | ~8–12 GB | GPU-accelerated calculations |
+
+## Quick Start
+
+```bash
+# Build minimal-serial (no MPI, single-core)
+./scripts/build-all.sh minimal-serial
+
+# Build MPI + OpenBLAS (parallel)
+./scripts/build-all.sh mpi-openblas
+
+# Run the H2 example calculation
+./examples/run-abinit.sh
+
+# Interactive shell in container
+./scripts/test-container.sh minimal-serial
+```
+
+**Prerequisites**: Docker, 10+ GB disk, 4+ GB RAM for Docker. Build time: ~20–40 min.
+
+## Custom ABINIT Sources
+
+```bash
+# Specific version
+export ABINIT_BRANCH=9.10.3
+./scripts/build-all.sh minimal-serial
+
+# From a fork
+export ABINIT_REPO=https://github.com/yourfork/abinit.git
+export ABINIT_BRANCH=feature-branch
+./scripts/build-all.sh minimal-serial
+```
+
+Build arguments: `ABINIT_REPO`, `ABINIT_BRANCH`, `RUN_TESTS` (`yes`/`no`), `TEST_SUITE` (`fast`/`paral`).
+
+## Running ABINIT
+
+```bash
+# Basic calculation
+docker run --rm -v $(pwd):/workspace \
+  abidocker/abinit:minimal-serial \
+  abinit input.in
+
+# With OpenMP threading
+docker run --rm -e OMP_NUM_THREADS=4 -v $(pwd):/workspace \
+  abidocker/abinit:minimal-serial \
+  abinit input.in
+
+# Extract test results
+docker run --rm abidocker/abinit:minimal-serial \
+  cat /opt/abinit/test-results/test.log
+```
+
+## Build Scripts
+
+| Script | Purpose |
+|---|---|
+| `scripts/build-all.sh` | Build one or more configurations |
+| `scripts/build-config.sh` | Build a single configuration with options |
+| `scripts/build-matrix.sh` | Build multiple configs (parallel capable) |
+| `scripts/test-container.sh` | Run and test containers interactively |
+| `scripts/ci/validate-build.sh` | Full CI validation pipeline |
+
+```bash
+# Build with tests
+./scripts/build-all.sh --run-tests mpi-openblas
+
+# Build specific branch, skip cache
+./scripts/build-all.sh --no-cache --branch 9.10.3 minimal-serial
+
+# CI validation
+./scripts/ci/validate-build.sh minimal-serial
+```
+
+## Project Structure
+
+```
+abidocker/
+├── .github/workflows/build-test.yml  # CI/CD pipeline
+├── AGENTS.md                         # AI agent guidelines
+├── CONTRIBUTING.md                   # Development guidelines
+├── CHANGELOG.md                      # Version history
+├── dockerfiles/
+│   ├── .dockerignore
+│   ├── common/install-deps.sh        # Shared dependency functions
+│   ├── minimal-serial/               # ✅ No MPI, netlib BLAS/LAPACK
+│   └── mpi-openblas/                 # ✅ OpenMPI, OpenBLAS, ScaLAPACK
+├── scripts/                          # Build, test, CI scripts
+├── docs/
+│   ├── BUILD_REQUIREMENTS.md         # Platform & dependency guide
+│   └── DOCKER_USAGE.md               # Detailed Docker usage
+└── examples/
+    ├── run-abinit.sh                 # Example runner
+    └── simple-calculation/           # H2 molecule test case
+```
+
+## CI/CD
+
+GitHub Actions workflow at `.github/workflows/build-test.yml` builds both configurations in parallel on push/PR to `main` or `master`. Requires `DOCKER_USERNAME` and `DOCKER_TOKEN` secrets for registry push.
+
+## Troubleshooting
+
+- **Build fails**: Ensure 10+ GB disk, 4+ GB Docker RAM. Check logs: `docker build ... 2>&1 | tee build.log`
+- **Tests fail**: Some failures expected with minimal config. Skip with `--build-arg RUN_TESTS=no`
+- **OOM**: Reduce system size in input, lower `OMP_NUM_THREADS`, increase Docker memory
+
+## Resources
+
+- [ABINIT Documentation](https://docs.abinit.org/)
+- [ABINIT Forum](https://discourse.abinit.org/)
+- [ABINIT GitHub](https://github.com/abinit/abinit)
+
+## License
+
+This Docker build infrastructure is provided as-is. ABINIT is distributed under GPL v2. See `Refs/abinit/COPYING`.

@@ -1,0 +1,41 @@
+# Git files
+.git
+.gitignore
+.gitmodules
+
+# ABINIT build artifacts in Refs
+Refs/abinit/.git
+Refs/abinit/build
+Refs/abinit/autom4te.cache
+Refs/abinit/**/*.o
+Refs/abinit/**/*.a
+Refs/abinit/**/*.so
+Refs/abinit/**/*.mod
+Refs/abinit/**/*.pyc
+Refs/abinit/**/__pycache__
+Refs/abinit/**/.prev_run.pickle
+Refs/abinit/**/_project_py3.pickle
+
+# Test results
+Refs/abinit/tests/Test_suite
+Refs/abinit/tests/**/*.out
+Refs/abinit/tests/**/*.log
+
+# Documentation build artifacts
+Refs/abinit/doc/_build
+Refs/abinit/doxygen_docs
+Refs/abinit/tmp-robodoc
+
+# Agent files (these are for host development only)
+agent_files
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
