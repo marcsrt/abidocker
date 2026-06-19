@@ -123,7 +123,8 @@ install_runtime_deps() {
         libnetcdf22 \
         libnetcdff7 \
         libxc9 \
-        libfftw3-3 \
+        libfftw3-single3 \
+        libfftw3-double3 \
         liblapack3 \
         libblas3 \
         libgfortran-15-dev \
